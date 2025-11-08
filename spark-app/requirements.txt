@@ -1,0 +1,4 @@
+# spark-app/requirements.txt
+pyarrow==14.0.2
+pandas==2.0.3
+python-dateutil>=2.9.0

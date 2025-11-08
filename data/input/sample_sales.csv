@@ -1,0 +1,7 @@
+Sale ID,Order Date,Customer ID,Customer Name,Product ID,Product Name,Quantity,Unit Price,Currency
+1001,2025-10-01,C-001,Anita Rao,P-01,Widget A,2,149.99,INR
+1002,2025-10-05,C-002,Rahul Singh,P-02,Widget B,1,249.50,INR
+1003,2025-10-12,C-001,Anita Rao,P-03,Widget C,3,99.00,INR
+1003,2025-10-12,C-001,Anita Rao,P-03,Widget C,3,99.00,INR
+1004,2025-11-02,C-003,Meera Jain,P-01,Widget A,1,149.99,INR
+1005,2025-11-06,C-004,Arun Kumar,P-04,Widget D,5,75.00,INR

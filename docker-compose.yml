@@ -1,0 +1,50 @@
+services:
+  spark-master:
+    image: apache/spark:3.5.1-python3
+    container_name: spark-master
+    command: ["/opt/spark/bin/spark-class","org.apache.spark.deploy.master.Master","--host","spark-master"]
+    ports: ["7077:7077","8080:8080"]
+    volumes:
+      - ${DATA_DIR}:/opt/spark-data
+      - ${DATA_DIR}/output:/opt/spark-output
+
+  spark-worker:
+    image: apache/spark:3.5.1-python3
+    container_name: spark-worker
+    depends_on: [spark-master]
+    command: ["/opt/spark/bin/spark-class","org.apache.spark.deploy.worker.Worker","spark://spark-master:7077"]
+    environment:
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+    ports: ["8081:8081"]
+    volumes:
+      - ${DATA_DIR}:/opt/spark-data
+      - ${DATA_DIR}/output:/opt/spark-output
+
+  spark-etl:
+    image: apache/spark:3.5.1-python3
+    container_name: spark-etl
+    depends_on: [spark-master, spark-worker]
+    env_file: [.env]
+    environment:
+      - INPUT_PATH=/opt/spark-data/input
+      - OUTPUT_PATH=/opt/spark-output
+    volumes:
+      - ${DATA_DIR}:/opt/spark-data
+      - ${DATA_DIR}/output:/opt/spark-output
+      - ./cache/ivy:/tmp/.ivy2
+      - ./spark-app:/opt/spark-app      # mounts app.py
+    entrypoint:
+      - /bin/bash
+      - -lc
+      - |
+        set -e
+        echo "Contents of $INPUT_PATH:"; ls -l "$INPUT_PATH"
+        mkdir -p /tmp/.ivy2 "$OUTPUT_PATH"
+        chmod -R 777 "$OUTPUT_PATH"
+        exec /opt/spark/bin/spark-submit \
+          --master spark://spark-master:7077 \
+          --conf spark.sql.shuffle.partitions=4 \
+          --conf spark.eventLog.enabled=false \
+          --conf spark.jars.ivy=/tmp/.ivy2 \
+          /opt/spark-app/app.py --input "$INPUT_PATH" --output "$OUTPUT_PATH"
